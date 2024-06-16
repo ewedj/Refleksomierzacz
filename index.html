@@ -1,0 +1,116 @@
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>JS: Refleksomierzacz</title>
+    <style>
+        #obszar {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            border: 1px #000 solid;
+            color: #000;
+            /*background: #4b2b6e;*/
+        }
+        .hidden{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1 id="main-header">Refleksomierzacz</h1>
+    <p>Gra, która mierzy refleks.</p>
+    <button id="start" type="button" onclick="startTheGame()">Start</button>
+    <button id="stop" style="display: none" type="button" onclick="stopTheGame()">Stop</button>
+    <div id="obszar" onclick="countTheTime()">
+        Czekaj na zmianę koloru
+    </div>
+    <div id="statystyki" class="hidden">
+        <p>Statystyki:</p>
+        <ol>
+            <li>Najkrótszy czas reakcji:<div id="minTime" >0</div></li>
+            <li>Najdłuższy czas reakcji:<div id="maxTime" >0</div></li>
+            <li>Średni czas reakcji:<div id="avgTime" >0</div></li>
+        </ol>
+    </div>
+</div>
+<script>
+    let startTime;
+    let timesArray = [];
+    const colorsArray = ['#628f36', '#30748f', '#792453', '#bb9c32', '#bd414a'];
+    let colors = [];
+    let randomDelay = Math.random() *10000;
+    const el =  document.getElementById("obszar");
+    const stats = document.getElementById("statystyki");
+    let clicked = true;
+    let stopTriggered = false;
+
+    function change() {
+        if (stopTriggered){
+            return;
+        }
+        startTime = new Date();
+        el.innerText = "";
+        el.style.background = colors.pop();
+        clicked = false;
+    }
+
+    function startTheGame() {
+        timesArray = [];
+        document.getElementById("start").style.display = "none";
+        document.getElementById("stop").style.display = "block";
+        el.innerText = "Czekaj na zmianę koloru";
+        el.style.background = '#ffffff';
+        colors = [...colorsArray];
+        stopTriggered = false;
+        setTimeout(change, randomDelay);
+        stats.classList.add("hidden");
+    }
+
+    function stopTheGame() {
+        document.getElementById("start").style.display = "block";
+        document.getElementById("stop").style.display = "none";
+        el.style.background = '#ffffff';
+        timesArray = [];
+        clicked = true;
+        stopTriggered = true;
+    }
+
+    function average(timesArray) {
+        console.log(timesArray);
+        return timesArray.reduce((a, b) => a + b, 0) / timesArray.length;
+    }
+
+    function countTheTime() {
+        if (clicked){
+            return;
+        }
+        clicked = true;
+        console.log("Kliknąłem",this);
+        const currentClickTime = new Date();
+        stats.classList.remove("hidden");
+        console.log(randomDelay);
+        randomDelay = Math.random() *10000;
+        if (colors.length > 0) {
+            setTimeout(change,randomDelay);
+        } else {
+            stopTheGame();
+            return;
+        }
+
+        const time = currentClickTime.getTime() - startTime.getTime();
+        timesArray.push(time);
+
+        const min = Math.min(... timesArray);
+        const max = Math.max(... timesArray);
+        console.log(min,max, "startTime ", startTime);
+        const avg = average([... timesArray]);
+
+        document.getElementById("minTime").innerText = min.toString();
+        document.getElementById("maxTime").innerText = max.toString();
+        document.getElementById("avgTime").innerText = avg.toString();
+        }
+
+</script>
+</body>
+</html>
